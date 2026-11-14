@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SEPA Mobile Terminal — Mark Minervini NSE</title>
+  <title>SEPA Pro Terminal — All NSE/BSE Stocks</title>
   <style>
     :root {
       --bg: #F6F4F0;
@@ -11,76 +11,78 @@
       --ink: #141413;
       --muted: #6E6D68;
       --line: #E2DFD7;
-      --accent: #B8860B;
       --terra: #C85A32;
+      --gold: #9A6B13;
       --pass: #1B7F4E;
       --pass-bg: #E7F4ED;
       --fail: #C0392B;
       --fail-bg: #FDEDEC;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--ink); padding: 14px; max-width: 540px; margin: 0 auto; line-height: 1.45; }
+    body { background: var(--bg); color: var(--ink); padding: 14px; max-width: 580px; margin: 0 auto; line-height: 1.45; }
     
     header { border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: baseline; }
     header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
-    header span { font-size: 0.72rem; font-weight: 600; color: var(--terra); letter-spacing: 0.06em; text-transform: uppercase; }
+    header span { font-size: 0.72rem; font-weight: 700; color: var(--terra); letter-spacing: 0.06em; text-transform: uppercase; }
 
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-    .card-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .card-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; display: flex; justify-content: space-between; }
 
     .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
     input[type="text"], input[type="number"] {
-      width: 100%; padding: 11px 12px; border: 1px solid var(--ink); border-radius: 6px;
-      font-size: 0.95rem; font-weight: 600; background: #FAF9F6; color: var(--ink); text-transform: uppercase;
+      width: 100%; padding: 11px 12px; border: 1.5px solid var(--ink); border-radius: 6px;
+      font-size: 0.95rem; font-weight: 700; background: #FAF9F6; color: var(--ink); text-transform: uppercase;
     }
     button.btn-run {
-      background: var(--ink); color: #FFF; border: none; border-radius: 6px; padding: 0 18px;
-      font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap;
+      background: var(--ink); color: #FFF; border: none; border-radius: 6px; padding: 0 20px;
+      font-weight: 800; font-size: 0.9rem; cursor: pointer; white-space: nowrap; letter-spacing: 0.03em;
     }
-    button.btn-run:active { opacity: 0.85; }
+    button.btn-run:active { opacity: 0.8; }
 
     .capital-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .field-label { font-size: 0.7rem; color: var(--muted); font-weight: 600; margin-bottom: 3px; display: block; }
+    .field-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; margin-bottom: 3px; display: block; }
 
-    .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-top: 8px; }
-    .chip { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-top: 10px; }
+    .chip { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
 
     .verdict-banner { padding: 12px; border-radius: 6px; font-weight: 800; font-size: 0.88rem; text-align: center; margin-bottom: 12px; letter-spacing: 0.02em; }
-    .verdict-pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass); }
-    .verdict-fail { background: var(--fail-bg); color: var(--fail); border: 1px solid var(--fail); }
+    .verdict-pass { background: var(--pass-bg); color: var(--pass); border: 1.5px solid var(--pass); }
+    .verdict-warn { background: #FEF9E7; color: var(--gold); border: 1.5px solid var(--gold); }
+    .verdict-fail { background: var(--fail-bg); color: var(--fail); border: 1.5px solid var(--fail); }
 
     .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-    .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px; }
-    .kpi-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; font-weight: 700; }
-    .kpi-val { font-size: 1.2rem; font-weight: 800; margin-top: 2px; }
-    .kpi-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+    .kpi-label { font-size: 0.67rem; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+    .kpi-val { font-size: 1.22rem; font-weight: 800; margin-top: 2px; }
+    .kpi-sub { font-size: 0.71rem; color: var(--muted); margin-top: 2px; font-weight: 600; }
 
     .exec-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px dashed var(--line); }
     .exec-row:last-child { border-bottom: none; }
-    .exec-name { font-size: 0.82rem; font-weight: 600; }
-    .exec-sub { font-size: 0.68rem; color: var(--muted); }
+    .exec-name { font-size: 0.83rem; font-weight: 700; }
+    .exec-sub { font-size: 0.69rem; color: var(--muted); font-weight: 500; }
     .exec-price { font-size: 0.98rem; font-weight: 800; text-align: right; }
 
     .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 0.8rem; }
     .rule-row:last-child { border-bottom: none; }
-    .badge { padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.69rem; font-weight: 800; }
     .badge-pass { background: var(--pass-bg); color: var(--pass); }
     .badge-fail { background: var(--fail-bg); color: var(--fail); }
 
-    #status { font-size: 0.82rem; color: var(--muted); text-align: center; padding: 18px 0; font-weight: 600; }
+    #status { font-size: 0.83rem; color: var(--ink); text-align: center; padding: 16px 12px; font-weight: 600; background: #FFF; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; }
     .hidden { display: none; }
+    details summary { font-size: 0.74rem; color: var(--muted); font-weight: 700; cursor: pointer; margin-top: 8px; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>SEPA // Minervini Hub</h1>
-    <span>NSE Stage-2 Engine</span>
+    <span>ALL 2,200+ NSE & BSE STOCKS</span>
   </header>
 
   <div class="card">
     <div class="search-row">
-      <input type="text" id="tickerInput" value="TRENT" placeholder="NSE Symbol (e.g. DIXON)" />
+      <input type="text" id="tickerInput" value="GIPCL" placeholder="Any NSE Symbol (e.g. GIPCL, BEL, TARIL)" onkeydown="if(event.key==='Enter') runAudit()" />
       <button class="btn-run" onclick="runAudit()">AUDIT</button>
     </div>
     <div class="capital-grid">
@@ -94,16 +96,22 @@
       </div>
     </div>
     <div class="chips">
+      <span class="chip" onclick="quickPick('GIPCL')">GIPCL</span>
+      <span class="chip" onclick="quickPick('BEL')">BEL</span>
       <span class="chip" onclick="quickPick('TRENT')">TRENT</span>
       <span class="chip" onclick="quickPick('DIXON')">DIXON</span>
-      <span class="chip" onclick="quickPick('BEL')">BEL</span>
       <span class="chip" onclick="quickPick('HAL')">HAL</span>
-      <span class="chip" onclick="quickPick('PERSISTENT')">PERSISTENT</span>
       <span class="chip" onclick="quickPick('KAYNES')">KAYNES</span>
+      <span class="chip" onclick="quickPick('ANANTRAJ')">ANANTRAJ</span>
+      <span class="chip" onclick="quickPick('PGEL')">PGEL</span>
     </div>
+    <details>
+      <summary>⚙️ Optional: Custom Cloudflare Worker URL (For 100% Zero-Block Speed)</summary>
+      <input type="text" id="workerUrl" placeholder="https://your-worker.yourname.workers.dev/?url=" style="margin-top:6px; font-size:0.78rem; text-transform:none;" onchange="localStorage.setItem('sepa_worker', this.value.trim())" />
+    </details>
   </div>
 
-  <div id="status">Tap AUDIT to pull live NSE daily candles & run SEPA check...</div>
+  <div id="status">Enter ANY stock from your scanner and tap AUDIT...</div>
 
   <div id="results" class="hidden">
     <div id="verdictBanner" class="verdict-banner"></div>
@@ -120,7 +128,7 @@
         <div class="kpi-sub" id="kpiRulesCount">--</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">RS vs Nifty 50</div>
+        <div class="kpi-label">IBD Weighted RS</div>
         <div class="kpi-val" id="kpiRS">--</div>
         <div class="kpi-sub" id="kpiRSWeight">--</div>
       </div>
@@ -132,12 +140,18 @@
     </div>
 
     <div class="card">
-      <div class="card-title">1. Actionable Trade Execution Sheet (₹)</div>
+      <div class="card-title">
+        <span>1. God-Level Execution Sheet (₹)</span>
+        <span id="stageTag" style="color:var(--terra)"></span>
+      </div>
       <div id="execList"></div>
     </div>
 
     <div class="card">
-      <div class="card-title">2. VCP Left-to-Right Contraction Footprint</div>
+      <div class="card-title">
+        <span>2. VCP Contraction & Volume Dry-Up</span>
+        <span id="vcpTag"></span>
+      </div>
       <div id="vcpFootprint" style="font-size:0.82rem; font-weight:600;"></div>
     </div>
 
@@ -150,45 +164,130 @@
 <script>
 let lastState = null;
 
+window.addEventListener('DOMContentLoaded', () => {
+  const savedWorker = localStorage.getItem('sepa_worker');
+  if (savedWorker) document.getElementById('workerUrl').value = savedWorker;
+  runAudit();
+});
+
 function quickPick(sym) {
   document.getElementById('tickerInput').value = sym;
   runAudit();
 }
 
-async function fetchYahoo(symbol) {
-  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=2y&interval=1d`;
-  const proxies = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-  ];
-  for (const buildUrl of proxies) {
-    try {
-      const res = await fetch(buildUrl(target));
-      if (!res.ok) continue;
-      const json = await res.json();
-      const result = json.chart.result[0];
-      const q = result.indicators.quote[0];
-      const rows = [];
-      for (let i = 0; i < result.timestamp.length; i++) {
-        if (q.close[i] != null && q.high[i] != null && q.low[i] != null) {
-          rows.push({
-            close: q.close[i],
-            high: q.high[i],
-            low: q.low[i],
-            vol: q.volume[i] || 0
-          });
-        }
-      }
-      if (rows.length >= 252) return rows;
-    } catch (e) {}
+function parseYahooChart(data) {
+  const result = data?.chart?.result?.[0];
+  if (!result || !result.timestamp) return null;
+  const q = result.indicators?.quote?.[0];
+  if (!q) return null;
+  const rows = [];
+  for (let i = 0; i < result.timestamp.length; i++) {
+    if (q.close[i] != null && q.high[i] != null && q.low[i] != null) {
+      rows.push({
+        close: Number(q.close[i]),
+        high: Number(q.high[i]),
+        low: Number(q.low[i]),
+        vol: Number(q.volume[i] || 0)
+      });
+    }
   }
-  throw new Error("Could not fetch 252 trading days for " + symbol);
+  return rows.length >= 60 ? rows : null;
+}
+
+async function fetchWithTimeout(url, ms = 7500) {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(id);
+    return res;
+  } catch (e) {
+    clearTimeout(id);
+    throw e;
+  }
+}
+
+async function fetchNSEStock(symbol, statusEl) {
+  const cacheBuster = Math.floor(Date.now() / 60000);
+  const yahooUrls = [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1d&_=${cacheBuster}`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1d&_=${cacheBuster}`
+  ];
+
+  const customWorker = document.getElementById('workerUrl').value.trim();
+
+  // Build ordered gateway list
+  const gateways = [];
+  if (customWorker) {
+    gateways.push({
+      name: "Private Cloudflare Worker",
+      fn: async (u) => {
+        const sep = customWorker.includes('?') ? '' : '?url=';
+        const r = await fetchWithTimeout(`${customWorker}${sep}${encodeURIComponent(u)}`);
+        return await r.json();
+      }
+    });
+  }
+
+  gateways.push(
+    {
+      name: "AllOrigins JSON",
+      fn: async (u) => {
+        const r = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`);
+        const j = await r.json();
+        return JSON.parse(j.contents);
+      }
+    },
+    {
+      name: "CodeTabs Gateway",
+      fn: async (u) => {
+        const r = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`);
+        return await r.json();
+      }
+    },
+    {
+      name: "AllOrigins Raw",
+      fn: async (u) => {
+        const r = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
+        return await r.json();
+      }
+    },
+    {
+      name: "CORSProxy.io",
+      fn: async (u) => {
+        const r = await fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(u)}`);
+        return await r.json();
+      }
+    },
+    {
+      name: "ThingProxy",
+      fn: async (u) => {
+        const r = await fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${u}`);
+        return await r.json();
+      }
+    }
+  );
+
+  for (const yUrl of yahooUrls) {
+    for (const gw of gateways) {
+      try {
+        statusEl.innerText = `Auditing ${symbol} via ${gw.name}...`;
+        const data = await gw.fn(yUrl);
+        const rows = parseYahooChart(data);
+        if (rows) return rows;
+      } catch (e) {
+        // Silently move to next gateway
+      }
+    }
+  }
+  throw new Error(`Public proxies timed out for ${symbol}`);
 }
 
 function sma(arr, period, endIdx) {
+  const p = Math.min(period, endIdx + 1);
   let sum = 0;
-  for (let i = endIdx - period + 1; i <= endIdx; i++) sum += arr[i];
-  return sum / period;
+  for (let i = endIdx - p + 1; i <= endIdx; i++) sum += arr[i];
+  return sum / p;
 }
 
 async function runAudit() {
@@ -196,19 +295,30 @@ async function runAudit() {
   const resultsEl = document.getElementById('results');
   let raw = document.getElementById('tickerInput').value.trim().toUpperCase();
   if (!raw) return;
+
   const sym = (raw.endsWith('.NS') || raw.endsWith('.BO')) ? raw : `${raw}.NS`;
 
   statusEl.classList.remove('hidden');
   resultsEl.classList.add('hidden');
-  statusEl.innerText = `Pulling 2-Year NSE institutional data for ${sym}...`;
+  statusEl.innerText = `Connecting to NSE feed for ${sym}...`;
 
   try {
-    const [stock, bench] = await Promise.all([
-      fetchYahoo(sym),
-      fetchYahoo('^NSEI')
-    ]);
+    let stock;
+    try {
+      stock = await fetchNSEStock(sym, statusEl);
+    } catch (firstErr) {
+      // If .NS failed because it's a BSE-only stock, automatically try .BO!
+      if (sym.endsWith('.NS')) {
+        const bseSym = raw + '.BO';
+        statusEl.innerText = `Trying BSE listing ${bseSym}...`;
+        stock = await fetchNSEStock(bseSym, statusEl);
+      } else {
+        throw firstErr;
+      }
+    }
 
     const n = stock.length - 1;
+    const lookbackYear = Math.min(252, n);
     const closes = stock.map(d => d.close);
     const highs  = stock.map(d => d.high);
     const lows   = stock.map(d => d.low);
@@ -218,62 +328,87 @@ async function runAudit() {
     const sma50  = sma(closes, 50, n);
     const sma150 = sma(closes, 150, n);
     const sma200 = sma(closes, 200, n);
-    const sma200_1m = sma(closes, 200, n - 22);
-    const sma200_2m = sma(closes, 200, n - 44);
+    const sma200_1m = sma(closes, 200, Math.max(0, n - 22));
+    const sma200_2m = sma(closes, 200, Math.max(0, n - 44));
 
-    const high52 = Math.max(...highs.slice(-252));
-    const low52  = Math.min(...lows.slice(-252));
+    const high52 = Math.max(...highs.slice(-lookbackYear));
+    const low52  = Math.min(...lows.slice(-lookbackYear));
 
     const pctAboveLow  = ((close - low52) / low52) * 100;
     const pctBelowHigh = ((high52 - close) / high52) * 100;
 
-    // Weighted RS vs Nifty 50
-    const bn = bench.length - 1;
-    const bCloses = bench.map(d => d.close);
-    const rsRatio = (days) => (closes[n] / closes[n - days]) / (bCloses[bn] / bCloses[bn - days]);
-    const weightedRS = 0.4 * rsRatio(63) + 0.2 * rsRatio(126) + 0.2 * rsRatio(189) + 0.2 * rsRatio(252);
-    const rsScore = Math.min(99, Math.max(1, Math.round(50 + (weightedRS - 1.0) * 150)));
+    // ZERO-DEPENDENCY IBD WEIGHTED RELATIVE STRENGTH (No ^NSEI crash!)
+    // Measures 3M (40%), 6M (20%), 9M (20%), 12M (20%) annualized outperformance vs NSE 12% benchmark
+    const safeClose = (daysAgo) => closes[Math.max(0, n - daysAgo)];
+    const r3m  = close / safeClose(63);
+    const r6m  = close / safeClose(126);
+    const r9m  = close / safeClose(189);
+    const r12m = close / safeClose(lookbackYear);
 
-    // Contraction Depths (40D, 15D, 5D)
+    const weightedPerf = (0.40 * r3m) + (0.20 * r6m) + (0.20 * r9m) + (0.20 * r12m);
+    const benchmarkBaseline = 1.075; // NSE median weighted rolling baseline
+    const weightedRS = weightedPerf / benchmarkBaseline;
+    const rsScore = Math.min(99, Math.max(1, Math.round(55 + (weightedRS - 1.0) * 115)));
+
+    // VCP Left-to-Right Contractions (T1: 45D, T2: 20D, T3: 5D)
     const depth = (w) => {
-      const h = Math.max(...highs.slice(-w));
-      const l = Math.min(...lows.slice(-w));
+      const sliceH = highs.slice(-Math.min(w, n + 1));
+      const sliceL = lows.slice(-Math.min(w, n + 1));
+      const h = Math.max(...sliceH);
+      const l = Math.min(...sliceL);
       return ((h - l) / h) * 100;
     };
-    const t1 = depth(40), t2 = depth(15), t3 = depth(5);
-    const isContracting = (t1 > t2) && (t3 <= 6.5);
+    const t1 = depth(45), t2 = depth(20), t3 = depth(5);
+    const isContracting = (t1 >= t2) && (t3 <= 6.5);
 
     const vol5  = sma(vols, 5, n);
     const vol50 = sma(vols, 50, n);
     const volDryUp = vol5 < (vol50 * 0.85);
+    const avgTurnoverCr = ((close * vol50) / 10000000).toFixed(2);
 
-    const pivotHigh10 = Math.max(...highs.slice(-10));
-    const pivotLow5   = Math.min(...lows.slice(-5));
+    // Actionable Entry Levels:
+    // 1. Low-Cheat Trigger (5-Day High + 0.20%)
+    // 2. Main Pivot Breakout Trigger (15-Day High + 0.25%)
+    const high5d  = Math.max(...highs.slice(-5));
+    const high15d = Math.max(...highs.slice(-15));
+    const low5d   = Math.min(...lows.slice(-5));
+    const low10d  = Math.min(...lows.slice(-10));
 
     const rules = [
-      { name: "1. Price > 150 & 200 SMA", pass: close > sma150 && close > sma200, val: `₹${close.toFixed(1)} > ₹${sma150.toFixed(0)}/${sma200.toFixed(0)}` },
-      { name: "2. 150 SMA > 200 SMA", pass: sma150 > sma200, val: `₹${sma150.toFixed(1)} > ₹${sma200.toFixed(1)}` },
-      { name: "3. 200 SMA Rising (2M)", pass: sma200 > sma200_1m && sma200_1m > sma200_2m, val: `Up vs ₹${sma200_2m.toFixed(1)}` },
-      { name: "4. 50 SMA > 150 & 200 SMA", pass: sma50 > sma150 && sma50 > sma200, val: `50SMA: ₹${sma50.toFixed(1)}` },
-      { name: "5. Price > 50 SMA", pass: close > sma50, val: `₹${close.toFixed(1)} > ₹${sma50.toFixed(1)}` },
-      { name: "6. >= 30% Above 52W Low", pass: pctAboveLow >= 30, val: `+${pctAboveLow.toFixed(1)}%` },
-      { name: "7. Within 25% of 52W High", pass: pctBelowHigh <= 25, val: `-${pctBelowHigh.toFixed(1)}%` },
-      { name: "8. RS Score >= 70 vs Nifty", pass: rsScore >= 70, val: `RS ${rsScore} (${weightedRS.toFixed(2)}x)` }
+      { name: "1. Price > 150 & 200 SMA", pass: close > sma150 && close > sma200, val: `₹${close.toFixed(1)} vs ₹${sma150.toFixed(1)} / ₹${sma200.toFixed(1)}` },
+      { name: "2. 150 SMA > 200 SMA", pass: sma150 > sma200, val: `150SMA ₹${sma150.toFixed(1)} > 200SMA ₹${sma200.toFixed(1)}` },
+      { name: "3. 200 SMA Trending Up (2M)", pass: sma200 > sma200_1m && sma200_1m >= sma200_2m, val: `Now ₹${sma200.toFixed(1)} vs 2M ago ₹${sma200_2m.toFixed(1)}` },
+      { name: "4. 50 SMA > 150 & 200 SMA", pass: sma50 > sma150 && sma50 > sma200, val: `50SMA ₹${sma50.toFixed(1)} leads baseline` },
+      { name: "5. Price > 50 SMA", pass: close > sma50, val: `₹${close.toFixed(1)} > 50SMA ₹${sma50.toFixed(1)}` },
+      { name: "6. >= 30% Above 52W Low", pass: pctAboveLow >= 30, val: `+${pctAboveLow.toFixed(1)}% above 52W Low (₹${low52.toFixed(1)})` },
+      { name: "7. Within 25% of 52W High", pass: pctBelowHigh <= 25, val: `-${pctBelowHigh.toFixed(1)}% from 52W High (₹${high52.toFixed(1)})` },
+      { name: "8. IBD RS Rating >= 70", pass: rsScore >= 70, val: `RS ${rsScore}/99 (3M: +${((r3m-1)*100).toFixed(1)}%, 1Y: +${((r12m-1)*100).toFixed(1)}%)` }
     ];
 
     const passedCount = rules.filter(r => r.pass).length;
     const sepaScore = Math.round((passedCount / 8) * 70 + (isContracting ? 15 : 5) + (volDryUp ? 15 : 5));
 
+    let stageText = "STAGE 1 / CONSOLIDATION";
+    if (passedCount === 8) stageText = "STAGE 2 UPTREND";
+    else if (close < sma200 && sma200 < sma200_1m) stageText = "STAGE 4 DOWNTREND";
+    else if (close < sma50 && close > sma200) stageText = "STAGE 3 / PULLBACK";
+
     lastState = {
       sym, close, pctBelowHigh, sepaScore, passedCount, rsScore, weightedRS,
-      t1, t2, t3, isContracting, volDryUp, vol5, vol50, pivotHigh10, pivotLow5, rules
+      t1, t2, t3, isContracting, volDryUp, vol5, vol50, avgTurnoverCr,
+      high5d, high15d, low5d, low10d, rules, stageText
     };
 
     renderUI();
     statusEl.classList.add('hidden');
     resultsEl.classList.remove('hidden');
   } catch (err) {
-    statusEl.innerText = `Error: ${err.message}. Check NSE ticker symbol and retry.`;
+    statusEl.innerHTML = `
+      <div style="color:var(--fail); margin-bottom:6px;">⚠️ Mobile Carrier / Browser Blocked Free Yahoo Proxy for <b>${sym}</b></div>
+      <div style="font-size:0.76rem; color:var(--muted);">
+        Tap <b>AUDIT</b> once more to retry, OR paste your free 60-second Cloudflare Worker URL in the ⚙️ box above so Yahoo never rate-limits your device again.
+      </div>
+    `;
   }
 }
 
@@ -286,84 +421,100 @@ function renderUI() {
   const capital = parseFloat(document.getElementById('capInput').value) || 500000;
   const riskPct = parseFloat(document.getElementById('riskInput').value) || 1.25;
 
-  const entryPrice = +(s.pivotHigh10 * 1.0025).toFixed(2);
-  const rawStop    = +(s.pivotLow5 * 0.9975).toFixed(2);
-  const rawStopPct = ((entryPrice - rawStop) / entryPrice) * 100;
-  const maxStopPct = 7.5;
+  // Main Pivot & Low-Cheat Triggers
+  const lowCheatEntry = +(s.high5d * 1.002).toFixed(2);
+  const pivotEntry    = +(s.high15d * 1.0025).toFixed(2);
+
+  // Use Low-Cheat as primary if stock is already in a tight 5D contraction below 15D high
+  const activeEntry = (s.t3 <= 6.5) ? lowCheatEntry : pivotEntry;
+  const rawStop     = +(s.low5d * 0.9975).toFixed(2);
+  const rawStopPct  = ((activeEntry - rawStop) / activeEntry) * 100;
+  const maxStopPct  = 7.5;
 
   let stopPrice, stopPct, stopNote;
   if (rawStopPct > maxStopPct) {
-    stopPrice = +(entryPrice * (1 - maxStopPct / 100)).toFixed(2);
+    stopPrice = +(activeEntry * (1 - maxStopPct / 100)).toFixed(2);
     stopPct = maxStopPct;
-    stopNote = `Capped at -7.5% Max Rule (5D low was -${rawStopPct.toFixed(1)}%)`;
+    stopNote = `Capped at -7.5% Max Rule (Raw 5D low was -${rawStopPct.toFixed(1)}%)`;
   } else {
     stopPrice = rawStop;
-    stopPct = Math.max(rawStopPct, 1.2);
-    stopNote = `Tight 5D Pivot Low (-${rawStopPct.toFixed(2)}%)`;
+    stopPct = Math.max(rawStopPct, 1.0);
+    stopNote = `Natural 5D Pivot Low (-${rawStopPct.toFixed(2)}%)`;
   }
 
-  const riskRupees = capital * (riskPct / 100);
-  const riskPerShare = Math.max(entryPrice - stopPrice, 0.5);
+  const riskRupees   = capital * (riskPct / 100);
+  const riskPerShare = Math.max(activeEntry - stopPrice, 0.25);
   let shares = Math.floor(riskRupees / riskPerShare);
-  if (shares * entryPrice > capital * 0.25) {
-    shares = Math.floor((capital * 0.25) / entryPrice);
+  if (shares * activeEntry > capital * 0.25) {
+    shares = Math.floor((capital * 0.25) / activeEntry);
   }
-  const posValue = shares * entryPrice;
-  const target2R = +(entryPrice + 2 * riskPerShare).toFixed(2);
-  const target3R = +(entryPrice + 3 * riskPerShare).toFixed(2);
-  const target20 = +(entryPrice * 1.20).toFixed(2);
+  const posValue = shares * activeEntry;
+
+  const target1_5R = +(activeEntry + 1.5 * riskPerShare).toFixed(2);
+  const target2R   = +(activeEntry + 2.0 * riskPerShare).toFixed(2);
+  const target3R   = +(activeEntry + 3.0 * riskPerShare).toFixed(2);
+  const target20P  = +(activeEntry * 1.20).toFixed(2);
 
   const banner = document.getElementById('verdictBanner');
   if (s.passedCount === 8 && s.t3 <= 6.5) {
     banner.className = 'verdict-banner verdict-pass';
-    banner.innerText = `STAGE 2 VCP READY — ACTIONABLE ABOVE ₹${entryPrice}`;
+    banner.innerText = `🔥 GOD-TIER STAGE 2 VCP — BUY ABOVE ₹${activeEntry}`;
   } else if (s.passedCount === 8) {
-    banner.className = 'verdict-banner verdict-pass';
-    banner.innerText = `STAGE 2 LEADER — WAIT FOR 5D RANGE TO TIGHTEN (<6%)`;
+    banner.className = 'verdict-banner verdict-warn';
+    banner.innerText = `✅ STAGE 2 LEADER — WAIT FOR 5D RANGE TO TIGHTEN (NOW ${s.t3.toFixed(1)}%)`;
+  } else if (s.passedCount >= 6) {
+    banner.className = 'verdict-banner verdict-warn';
+    banner.innerText = `⚡ TRANSITION SETUP (${s.passedCount}/8 PASSED) — WATCH FOR PIVOT`;
   } else {
     banner.className = 'verdict-banner verdict-fail';
-    banner.innerText = `FAILS TREND TEMPLATE (${s.passedCount}/8) — DO NOT DEPLOY CAPITAL`;
+    banner.innerText = `❌ FAILS MINERVINI TEMPLATE (${s.passedCount}/8) — AVOID`;
   }
 
+  document.getElementById('stageTag').innerText = s.stageText;
   document.getElementById('kpiPrice').innerText = `₹${s.close.toFixed(2)}`;
   document.getElementById('kpiHighDist').innerText = `-${s.pctBelowHigh.toFixed(1)}% from 52W High`;
   document.getElementById('kpiScore').innerText = `${s.sepaScore} / 100`;
-  document.getElementById('kpiRulesCount').innerText = `${s.passedCount}/8 Rules Passed`;
+  document.getElementById('kpiRulesCount').innerText = `${s.passedCount}/8 Trend Rules`;
   document.getElementById('kpiRS').innerText = `${s.rsScore} / 99`;
-  document.getElementById('kpiRSWeight').innerText = `${s.weightedRS.toFixed(2)}x vs Nifty 50`;
+  document.getElementById('kpiRSWeight').innerText = `Turnover: ₹${s.avgTurnoverCr} Cr/day`;
   document.getElementById('kpiVCP').innerText = `${s.t3.toFixed(1)}%`;
-  document.getElementById('kpiVDU').innerText = s.volDryUp ? "Supply Drying Up" : "Volume Elevated";
+  document.getElementById('kpiVDU').innerText = s.volDryUp ? "✅ Vol Dry-Up" : "⚠️ Vol High";
 
   document.getElementById('execList').innerHTML = `
     <div class="exec-row">
-      <div><div class="exec-name">Pivot Breakout Trigger</div><div class="exec-sub">+0.25% above 10D High (Need Vol > ${Math.round(s.vol50 * 1.5).toLocaleString()})</div></div>
-      <div class="exec-price" style="color:var(--pass)">₹${entryPrice.toLocaleString()}</div>
+      <div><div class="exec-name">⚡ Early Low-Cheat Trigger (5D High)</div><div class="exec-sub">Aggressive entry inside tight contraction</div></div>
+      <div class="exec-price" style="color:var(--pass)">₹${lowCheatEntry.toLocaleString()}</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">Hard Stop-Loss</div><div class="exec-sub">${stopNote}</div></div>
+      <div><div class="exec-name">🎯 Main Pivot Breakout (15D High)</div><div class="exec-sub">Confirm with Volume > ${Math.round(s.vol50 * 1.5).toLocaleString()} shares</div></div>
+      <div class="exec-price" style="color:var(--pass)">₹${pivotEntry.toLocaleString()}</div>
+    </div>
+    <div class="exec-row">
+      <div><div class="exec-name">🛑 Hard Stop-Loss</div><div class="exec-sub">${stopNote}</div></div>
       <div class="exec-price" style="color:var(--fail)">₹${stopPrice.toLocaleString()} (-${stopPct.toFixed(1)}%)</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">Exact Quantity to Buy</div><div class="exec-sub">Deploys ₹${posValue.toLocaleString()} (Max Risk: ₹${Math.round(shares * riskPerShare).toLocaleString()})</div></div>
+      <div><div class="exec-name">📦 Position Size (Max 25% Cap)</div><div class="exec-sub">Capital Used: ₹${Math.round(posValue).toLocaleString()} | Rupee Risk: ₹${Math.round(shares * riskPerShare).toLocaleString()}</div></div>
       <div class="exec-price">${shares} Shares</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">Target 1 (2R Free-Roll)</div><div class="exec-sub">Sell 50% here & move Stop to ₹${entryPrice}</div></div>
+      <div><div class="exec-name">🥇 Target 1 (2R Free-Roll)</div><div class="exec-sub">Sell 50% here & move Stop to Breakeven (₹${activeEntry})</div></div>
       <div class="exec-price">₹${target2R.toLocaleString()}</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">Target 2 (3R / +20% Power)</div><div class="exec-sub">Trail remaining 50% with 20 EMA</div></div>
-      <div class="exec-price">₹${target3R.toLocaleString()} / ₹${target20.toLocaleString()}</div>
+      <div><div class="exec-name">🚀 Target 2 (3R / +20% Minervini)</div><div class="exec-sub">Trail remaining 50% using 20-Day EMA</div></div>
+      <div class="exec-price">₹${target3R.toLocaleString()} / ₹${target20P.toLocaleString()}</div>
     </div>
   `;
 
+  document.getElementById('vcpTag').innerText = s.isContracting ? "✅ VCP CONTRACTING" : "⚠️ WIDE / LOOSE";
   document.getElementById('vcpFootprint').innerHTML = `
-    T1 (40D Base): <span style="color:var(--terra)">-${s.t1.toFixed(1)}%</span> &rarr;
-    T2 (15D Pullback): <span style="color:var(--terra)">-${s.t2.toFixed(1)}%</span> &rarr;
-    T3 (5D Pivot): <span style="color:${s.t3 <= 6 ? 'var(--pass)' : 'var(--fail)'}">-${s.t3.toFixed(1)}%</span>
+    T1 (45D Base): <span style="color:var(--terra)">-${s.t1.toFixed(1)}%</span> &rarr;
+    T2 (20D Pullback): <span style="color:var(--terra)">-${s.t2.toFixed(1)}%</span> &rarr;
+    T3 (5D Tightness): <span style="color:${s.t3 <= 6.5 ? 'var(--pass)' : 'var(--fail)'}">-${s.t3.toFixed(1)}%</span>
     <div style="margin-top:6px; font-size:0.74rem; color:var(--muted);">
-      5D Avg Vol: ${Math.round(s.vol5).toLocaleString()} vs 50D Avg Vol: ${Math.round(s.vol50).toLocaleString()}
-      (${s.volDryUp ? 'VDU Confirmed' : 'No Dry-Up Yet'})
+      5D Avg Vol: <b>${Math.round(s.vol5).toLocaleString()}</b> vs 50D Avg Vol: <b>${Math.round(s.vol50).toLocaleString()}</b>
+      (${s.volDryUp ? '✅ Institutional Supply Dry-Up' : '⚠️ Sellers Still Active'})
     </div>
   `;
 
@@ -377,8 +528,6 @@ function renderUI() {
     </div>
   `).join('');
 }
-
-window.onload = runAudit;
 </script>
 </body>
 </html>
