@@ -70,7 +70,6 @@
 
     #status { font-size: 0.83rem; color: var(--ink); text-align: center; padding: 16px 12px; font-weight: 600; background: #FFF; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; }
     .hidden { display: none; }
-    details summary { font-size: 0.74rem; color: var(--muted); font-weight: 700; cursor: pointer; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -82,7 +81,7 @@
 
   <div class="card">
     <div class="search-row">
-      <input type="text" id="tickerInput" value="GIPCL" placeholder="Any NSE Symbol (e.g. GIPCL, BEL, TARIL)" onkeydown="if(event.key==='Enter') runAudit()" />
+      <input type="text" id="tickerInput" value="GIPCL" placeholder="Any NSE Symbol (e.g. GIPCL, BEL, TRENT)" onkeydown="if(event.key==='Enter') runAudit()" />
       <button class="btn-run" onclick="runAudit()">AUDIT</button>
     </div>
     <div class="capital-grid">
@@ -105,10 +104,6 @@
       <span class="chip" onclick="quickPick('ANANTRAJ')">ANANTRAJ</span>
       <span class="chip" onclick="quickPick('PGEL')">PGEL</span>
     </div>
-    <details>
-      <summary>⚙️ Optional: Custom Cloudflare Worker URL (For 100% Zero-Block Speed)</summary>
-      <input type="text" id="workerUrl" placeholder="https://your-worker.yourname.workers.dev/?url=" style="margin-top:6px; font-size:0.78rem; text-transform:none;" onchange="localStorage.setItem('sepa_worker', this.value.trim())" />
-    </details>
   </div>
 
   <div id="status">Enter ANY stock from your scanner and tap AUDIT...</div>
@@ -165,8 +160,6 @@
 let lastState = null;
 
 window.addEventListener('DOMContentLoaded', () => {
-  const savedWorker = localStorage.getItem('sepa_worker');
-  if (savedWorker) document.getElementById('workerUrl').value = savedWorker;
   runAudit();
 });
 
@@ -194,93 +187,37 @@ function parseYahooChart(data) {
   return rows.length >= 60 ? rows : null;
 }
 
-async function fetchWithTimeout(url, ms = 7500) {
-  const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), ms);
-  try {
-    const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
-    clearTimeout(id);
-    return res;
-  } catch (e) {
-    clearTimeout(id);
-    throw e;
-  }
-}
-
 async function fetchNSEStock(symbol, statusEl) {
   const cacheBuster = Math.floor(Date.now() / 60000);
-  const yahooUrls = [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1d&_=${cacheBuster}`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1d&_=${cacheBuster}`
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1d&_=${cacheBuster}`;
+
+  const gateways = [
+    async (u) => {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`);
+      const j = await r.json();
+      return JSON.parse(j.contents);
+    },
+    async (u) => {
+      const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`);
+      return await r.json();
+    },
+    async (u) => {
+      const r = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(u)}`);
+      return await r.json();
+    }
   ];
 
-  const customWorker = document.getElementById('workerUrl').value.trim();
-
-  // Build ordered gateway list
-  const gateways = [];
-  if (customWorker) {
-    gateways.push({
-      name: "Private Cloudflare Worker",
-      fn: async (u) => {
-        const sep = customWorker.includes('?') ? '' : '?url=';
-        const r = await fetchWithTimeout(`${customWorker}${sep}${encodeURIComponent(u)}`);
-        return await r.json();
-      }
-    });
-  }
-
-  gateways.push(
-    {
-      name: "AllOrigins JSON",
-      fn: async (u) => {
-        const r = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`);
-        const j = await r.json();
-        return JSON.parse(j.contents);
-      }
-    },
-    {
-      name: "CodeTabs Gateway",
-      fn: async (u) => {
-        const r = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`);
-        return await r.json();
-      }
-    },
-    {
-      name: "AllOrigins Raw",
-      fn: async (u) => {
-        const r = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
-        return await r.json();
-      }
-    },
-    {
-      name: "CORSProxy.io",
-      fn: async (u) => {
-        const r = await fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(u)}`);
-        return await r.json();
-      }
-    },
-    {
-      name: "ThingProxy",
-      fn: async (u) => {
-        const r = await fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${u}`);
-        return await r.json();
-      }
-    }
-  );
-
-  for (const yUrl of yahooUrls) {
-    for (const gw of gateways) {
-      try {
-        statusEl.innerText = `Auditing ${symbol} via ${gw.name}...`;
-        const data = await gw.fn(yUrl);
-        const rows = parseYahooChart(data);
-        if (rows) return rows;
-      } catch (e) {
-        // Silently move to next gateway
-      }
+  for (const gw of gateways) {
+    try {
+      statusEl.innerText = `Auditing ${symbol}...`;
+      const data = await gw(targetUrl);
+      const rows = parseYahooChart(data);
+      if (rows) return rows;
+    } catch (e) {
+      // Try next public gateway
     }
   }
-  throw new Error(`Public proxies timed out for ${symbol}`);
+  throw new Error(`Could not fetch data for ${symbol}`);
 }
 
 function sma(arr, period, endIdx) {
@@ -307,7 +244,6 @@ async function runAudit() {
     try {
       stock = await fetchNSEStock(sym, statusEl);
     } catch (firstErr) {
-      // If .NS failed because it's a BSE-only stock, automatically try .BO!
       if (sym.endsWith('.NS')) {
         const bseSym = raw + '.BO';
         statusEl.innerText = `Trying BSE listing ${bseSym}...`;
@@ -337,8 +273,6 @@ async function runAudit() {
     const pctAboveLow  = ((close - low52) / low52) * 100;
     const pctBelowHigh = ((high52 - close) / high52) * 100;
 
-    // ZERO-DEPENDENCY IBD WEIGHTED RELATIVE STRENGTH (No ^NSEI crash!)
-    // Measures 3M (40%), 6M (20%), 9M (20%), 12M (20%) annualized outperformance vs NSE 12% benchmark
     const safeClose = (daysAgo) => closes[Math.max(0, n - daysAgo)];
     const r3m  = close / safeClose(63);
     const r6m  = close / safeClose(126);
@@ -346,16 +280,12 @@ async function runAudit() {
     const r12m = close / safeClose(lookbackYear);
 
     const weightedPerf = (0.40 * r3m) + (0.20 * r6m) + (0.20 * r9m) + (0.20 * r12m);
-    const benchmarkBaseline = 1.075; // NSE median weighted rolling baseline
-    const weightedRS = weightedPerf / benchmarkBaseline;
+    const weightedRS = weightedPerf / 1.075;
     const rsScore = Math.min(99, Math.max(1, Math.round(55 + (weightedRS - 1.0) * 115)));
 
-    // VCP Left-to-Right Contractions (T1: 45D, T2: 20D, T3: 5D)
     const depth = (w) => {
-      const sliceH = highs.slice(-Math.min(w, n + 1));
-      const sliceL = lows.slice(-Math.min(w, n + 1));
-      const h = Math.max(...sliceH);
-      const l = Math.min(...sliceL);
+      const h = Math.max(...highs.slice(-Math.min(w, n + 1)));
+      const l = Math.min(...lows.slice(-Math.min(w, n + 1)));
       return ((h - l) / h) * 100;
     };
     const t1 = depth(45), t2 = depth(20), t3 = depth(5);
@@ -366,13 +296,9 @@ async function runAudit() {
     const volDryUp = vol5 < (vol50 * 0.85);
     const avgTurnoverCr = ((close * vol50) / 10000000).toFixed(2);
 
-    // Actionable Entry Levels:
-    // 1. Low-Cheat Trigger (5-Day High + 0.20%)
-    // 2. Main Pivot Breakout Trigger (15-Day High + 0.25%)
     const high5d  = Math.max(...highs.slice(-5));
     const high15d = Math.max(...highs.slice(-15));
     const low5d   = Math.min(...lows.slice(-5));
-    const low10d  = Math.min(...lows.slice(-10));
 
     const rules = [
       { name: "1. Price > 150 & 200 SMA", pass: close > sma150 && close > sma200, val: `₹${close.toFixed(1)} vs ₹${sma150.toFixed(1)} / ₹${sma200.toFixed(1)}` },
@@ -380,9 +306,9 @@ async function runAudit() {
       { name: "3. 200 SMA Trending Up (2M)", pass: sma200 > sma200_1m && sma200_1m >= sma200_2m, val: `Now ₹${sma200.toFixed(1)} vs 2M ago ₹${sma200_2m.toFixed(1)}` },
       { name: "4. 50 SMA > 150 & 200 SMA", pass: sma50 > sma150 && sma50 > sma200, val: `50SMA ₹${sma50.toFixed(1)} leads baseline` },
       { name: "5. Price > 50 SMA", pass: close > sma50, val: `₹${close.toFixed(1)} > 50SMA ₹${sma50.toFixed(1)}` },
-      { name: "6. >= 30% Above 52W Low", pass: pctAboveLow >= 30, val: `+${pctAboveLow.toFixed(1)}% above 52W Low (₹${low52.toFixed(1)})` },
-      { name: "7. Within 25% of 52W High", pass: pctBelowHigh <= 25, val: `-${pctBelowHigh.toFixed(1)}% from 52W High (₹${high52.toFixed(1)})` },
-      { name: "8. IBD RS Rating >= 70", pass: rsScore >= 70, val: `RS ${rsScore}/99 (3M: +${((r3m-1)*100).toFixed(1)}%, 1Y: +${((r12m-1)*100).toFixed(1)}%)` }
+      { name: "6. >= 30% Above 52W Low", pass: pctAboveLow >= 30, val: `+${pctAboveLow.toFixed(1)}% above 52W Low` },
+      { name: "7. Within 25% of 52W High", pass: pctBelowHigh <= 25, val: `-${pctBelowHigh.toFixed(1)}% from 52W High` },
+      { name: "8. IBD RS Rating >= 70", pass: rsScore >= 70, val: `RS ${rsScore}/99 (3M: +${((r3m-1)*100).toFixed(1)}%)` }
     ];
 
     const passedCount = rules.filter(r => r.pass).length;
@@ -396,19 +322,14 @@ async function runAudit() {
     lastState = {
       sym, close, pctBelowHigh, sepaScore, passedCount, rsScore, weightedRS,
       t1, t2, t3, isContracting, volDryUp, vol5, vol50, avgTurnoverCr,
-      high5d, high15d, low5d, low10d, rules, stageText
+      high5d, high15d, low5d, rules, stageText
     };
 
     renderUI();
     statusEl.classList.add('hidden');
     resultsEl.classList.remove('hidden');
   } catch (err) {
-    statusEl.innerHTML = `
-      <div style="color:var(--fail); margin-bottom:6px;">⚠️ Mobile Carrier / Browser Blocked Free Yahoo Proxy for <b>${sym}</b></div>
-      <div style="font-size:0.76rem; color:var(--muted);">
-        Tap <b>AUDIT</b> once more to retry, OR paste your free 60-second Cloudflare Worker URL in the ⚙️ box above so Yahoo never rate-limits your device again.
-      </div>
-    `;
+    statusEl.innerHTML = `⚠️ Could not load data for <b>${sym}</b>. Check the ticker symbol or try another stock.`;
   }
 }
 
@@ -421,21 +342,18 @@ function renderUI() {
   const capital = parseFloat(document.getElementById('capInput').value) || 500000;
   const riskPct = parseFloat(document.getElementById('riskInput').value) || 1.25;
 
-  // Main Pivot & Low-Cheat Triggers
   const lowCheatEntry = +(s.high5d * 1.002).toFixed(2);
   const pivotEntry    = +(s.high15d * 1.0025).toFixed(2);
-
-  // Use Low-Cheat as primary if stock is already in a tight 5D contraction below 15D high
-  const activeEntry = (s.t3 <= 6.5) ? lowCheatEntry : pivotEntry;
-  const rawStop     = +(s.low5d * 0.9975).toFixed(2);
-  const rawStopPct  = ((activeEntry - rawStop) / activeEntry) * 100;
-  const maxStopPct  = 7.5;
+  const activeEntry   = (s.t3 <= 6.5) ? lowCheatEntry : pivotEntry;
+  const rawStop       = +(s.low5d * 0.9975).toFixed(2);
+  const rawStopPct    = ((activeEntry - rawStop) / activeEntry) * 100;
+  const maxStopPct    = 7.5;
 
   let stopPrice, stopPct, stopNote;
   if (rawStopPct > maxStopPct) {
     stopPrice = +(activeEntry * (1 - maxStopPct / 100)).toFixed(2);
     stopPct = maxStopPct;
-    stopNote = `Capped at -7.5% Max Rule (Raw 5D low was -${rawStopPct.toFixed(1)}%)`;
+    stopNote = `Capped at -7.5% Max Rule`;
   } else {
     stopPrice = rawStop;
     stopPct = Math.max(rawStopPct, 1.0);
@@ -450,10 +368,9 @@ function renderUI() {
   }
   const posValue = shares * activeEntry;
 
-  const target1_5R = +(activeEntry + 1.5 * riskPerShare).toFixed(2);
-  const target2R   = +(activeEntry + 2.0 * riskPerShare).toFixed(2);
-  const target3R   = +(activeEntry + 3.0 * riskPerShare).toFixed(2);
-  const target20P  = +(activeEntry * 1.20).toFixed(2);
+  const target2R  = +(activeEntry + 2.0 * riskPerShare).toFixed(2);
+  const target3R  = +(activeEntry + 3.0 * riskPerShare).toFixed(2);
+  const target20P = +(activeEntry * 1.20).toFixed(2);
 
   const banner = document.getElementById('verdictBanner');
   if (s.passedCount === 8 && s.t3 <= 6.5) {
@@ -486,7 +403,7 @@ function renderUI() {
       <div class="exec-price" style="color:var(--pass)">₹${lowCheatEntry.toLocaleString()}</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">🎯 Main Pivot Breakout (15D High)</div><div class="exec-sub">Confirm with Volume > ${Math.round(s.vol50 * 1.5).toLocaleString()} shares</div></div>
+      <div><div class="exec-name">🎯 Main Pivot Breakout (15D High)</div><div class="exec-sub">Confirm with Volume expansion</div></div>
       <div class="exec-price" style="color:var(--pass)">₹${pivotEntry.toLocaleString()}</div>
     </div>
     <div class="exec-row">
@@ -494,11 +411,11 @@ function renderUI() {
       <div class="exec-price" style="color:var(--fail)">₹${stopPrice.toLocaleString()} (-${stopPct.toFixed(1)}%)</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">📦 Position Size (Max 25% Cap)</div><div class="exec-sub">Capital Used: ₹${Math.round(posValue).toLocaleString()} | Rupee Risk: ₹${Math.round(shares * riskPerShare).toLocaleString()}</div></div>
+      <div><div class="exec-name">📦 Position Size (Max 25% Cap)</div><div class="exec-sub">Capital Used: ₹${Math.round(posValue).toLocaleString()} | Risk: ₹${Math.round(shares * riskPerShare).toLocaleString()}</div></div>
       <div class="exec-price">${shares} Shares</div>
     </div>
     <div class="exec-row">
-      <div><div class="exec-name">🥇 Target 1 (2R Free-Roll)</div><div class="exec-sub">Sell 50% here & move Stop to Breakeven (₹${activeEntry})</div></div>
+      <div><div class="exec-name">🥇 Target 1 (2R Free-Roll)</div><div class="exec-sub">Sell 50% here & move Stop to Breakeven</div></div>
       <div class="exec-price">₹${target2R.toLocaleString()}</div>
     </div>
     <div class="exec-row">
